@@ -337,12 +337,58 @@ Options: (H) means HTTP/HTTPS only, (F) means FTP only
  //-q                 如果作为第一个参数, .curlrc 中的设置无效。 curl会在程序启动时会自动尝试读取用户家目录中的.curlrc文件。
 ````
 
-## 常用命令速记住
+## 命令速记
 
-## 常见问题记录
+### 基础案例
+
+* 请求个人blog主页
+```SHELL
+curl https://wangjstu.github.io/
+```
+
+* 请求funet的ftp的README文件
+```SHELL
+curl ftp://ftp.funet.fi/README
+```
+
+* 通过端口8000获取某主页
+```SHELL
+curl http://www.weirdserver.com:8000/
+```
+
+* 获取ftp站点的目录列表
+```SHELL
+curl ftp://ftp.funet.fi/
+```
+
+* 通过字典查询单词
+```SHELL
+//Aliases for ‘m’ are ‘match’ and ‘find’, and aliases for ‘d’ are ‘define’ and ‘lookup’
+# 查询bash单词的含义
+curl dict://dict.org/d:bash 
+# 列出所有可用词典
+curl dict://dict.org/show:db
+# 在foldoc词典中查询bash单词的含义
+curl dict://dict.org/d:bash:foldoc
+# 查看curl的定义
+curl dict://dict.org/m:curl
+```
+
+* 一次请求两个页面
+```SHELL
+curl ftp://cool.haxx.se/ http://www.weirdserver.com:8000/
+```
+
+* 获取ftps上文件
+```SHELL
+curl ftps://files.are.secure.com/secrets.txt
+```
+
+
+## 常见问题记
 
 ----
-### 参考文档:
+## 参考文档:
 * [curl 文档主页](https://curl.haxx.se/docs/manpage.html)
 * [curl 帮助指南](https://curl.haxx.se/docs/manual.html)
 * [HTTP Authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
