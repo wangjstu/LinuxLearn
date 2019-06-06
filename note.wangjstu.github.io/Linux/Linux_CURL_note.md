@@ -384,6 +384,45 @@ curl ftp://cool.haxx.se/ http://www.weirdserver.com:8000/
 curl ftps://files.are.secure.com/secrets.txt
 ```
 
+* 获取ftps上文件
+```SHELL
+#直接使用ftps协议
+curl ftps://files.are.secure.com/secrets.txt
+#使用ftp协议，并增加ssl选项
+curl --ftp-ssl ftp://files.are.secure.com/secrets.txt
+```
+
+* 通过ssh协议(SFTP)结合账号名获取一个文件
+```SHELL
+curl -u username sftp://example.com/etc/issue
+```
+
+* 通过ssh协议(SCP)结合私钥获取一个文件
+```SHELL
+#密码不保护输入方式
+curl -u username: --key ~/.ssh/id_rsa  scp://example.com/~/file.txt
+#密码保护方式
+curl -u username: --key ~/.ssh/id_rsa --pass private_key_password   scp://example.com/~/file.txt
+```
+
+* 访问已个IPV6站点下载文件
+```SHELL
+curl "http://[2001:1890:1112:1::20]/"
+```
+
+* 访问SMB站点下载文件
+```SHELL
+curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
+```
+
+### 下载保存到文件
+
+* 访问SMB站点下载文件
+```SHELL
+curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
+```
+
+
 
 ## 常见问题记
 
