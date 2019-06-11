@@ -3,18 +3,22 @@
 ## 时序图(Sequence)
 Typora时序图是依托于[js-sequence](https://bramp.github.io/js-sequence-diagrams/)实现。来看一个例子：
 
-```sequence
+~~~gfm
+​```sequence
 Alice->Bob: Hello Bob, how are you?
 Note right of Bob: Bob thinks
 Bob-->Alice: I am good thanks!
-```
+​```
+~~~
 
 ![Sequence](http://support.typora.io/media/diagrams/Snip20160816_1.png)
 
 
 ## 流程图(Flowchart)
 Typora流程图依托于[flowchart.js](http://flowchart.js.org/)实现。来看个例子：
-```flow
+
+~~~gfm
+ ```flow
 st=>start: Start
 op=>operation: Your Operation
 cond=>condition: Yes or No?
@@ -23,7 +27,8 @@ e=>end
 st->op->cond
 cond(yes)->e
 cond(no)->op
-```
+ ```
+~~~
 
 ![Flowchart](http://support.typora.io/media/diagrams/Snip20160816_2.png)
 
@@ -32,8 +37,9 @@ cond(no)->op
 Typora另外还结合[Mermaid](https://mermaidjs.github.io/)，支持了Mermaid模式下的时序图(sequence)，流程图(flowchart)和甘特图(Gantt)。
 
 ### 时序图(mermaid sequence)
-```mermaid
-%% Example of sequence diagram
+~~~gfm
+ ```mermaid
+ %% Example of sequence diagram
   sequenceDiagram
     Alice->>Bob: Hello Bob, how are you?
     alt is sick
@@ -44,23 +50,29 @@ Typora另外还结合[Mermaid](https://mermaidjs.github.io/)，支持了Mermaid�
     opt Extra response
     Bob->>Alice: Thanks for asking
     end
-```
+ ```
+~~~
 
 ![mermaid sequence](http://support.typora.io/media/diagrams/Snip20160816_3.png)
 
 ### 流程图(mermaid flowchart)
-```mermaid
+
+~~~gfm
+ ```mermaid
 graph LR
 A[Hard edge] -->B(Round edge)
     B --> C{Decision}
     C -->|One| D(Result one)
     C -->|Two| E[Result two]
-```
+ ```
+~~~
 
 ![mermaid flowchart](http://support.typora.io/media/diagrams/Snip20160816_4.png)
 
 ### 甘特图(mermaid Gantt)
-```mermaid
+
+~~~gfm
+ ```mermaid
 %% Example with selection of syntaxes
         gantt
         dateFormat  YYYY-MM-DD
@@ -89,7 +101,8 @@ A[Hard edge] -->B(Round edge)
         Describe gantt syntax               :after doc1, 3d
         Add gantt diagram to demo page      : 20h
         Add another diagram to demo page    : 48h
-```
+ ```
+~~~
 
 ![mermaid Gantt](http://support.typora.io/media/diagrams/Snip20160816_5.png)
 
