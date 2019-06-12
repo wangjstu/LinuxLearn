@@ -4,14 +4,31 @@
 Typora时序图是依托于[js-sequence](https://bramp.github.io/js-sequence-diagrams/)实现。来看一个例子：
 
 ~~~gfm
-​```sequence
-Alice->Bob: Hello Bob, how are you?
-Note right of Bob: Bob thinks
-Bob-->Alice: I am good thanks!
-​```
+ ```sequence
+ Alice->Bob: Hello Bob, how are you?
+ Note right of Bob: Bob thinks
+ Bob-->Alice: I am good thanks!
+ ```
 ~~~
 
 ![Sequence](http://support.typora.io/media/diagrams/Snip20160816_1.png)
+
+其他网上例子，你可以copy下去试下：
+~~~gfm
+ ```sequence
+Title: 标题：复杂使用
+对象A->对象B: 对象B你好吗?（请求）
+Note right of 对象B: 对象B的描述
+Note left of 对象A: 对象A的描述(提示)
+对象B-->对象A: 我很好(响应)
+对象B->小三: 你好吗
+小三-->>对象A: 对象B找我了
+对象A->对象B: 你真的好吗？
+Note over 小三,对象B: 我们是朋友
+participant C
+Note right of C: 没人陪我玩
+ ```
+~~~
 
 
 ## 流程图(Flowchart)
@@ -31,6 +48,21 @@ cond(no)->op
 ~~~
 
 ![Flowchart](http://support.typora.io/media/diagrams/Snip20160816_2.png)
+
+其他网上例子，你可以copy下去试下：
+~~~gfm
+ ```flow
+st=>start: 开始框
+op=>operation: 处理框
+cond=>condition: 判断框(是或否?)
+sub1=>subroutine: 子流程
+io=>inputoutput: 输入输出框
+e=>end: 结束框
+st->op->cond
+cond(yes)->io->e
+cond(no)->sub1(right)->op
+ ```
+~~~
 
 
 ## mermaid diagrams
@@ -54,6 +86,25 @@ Typora另外还结合[Mermaid](https://mermaidjs.github.io/)，支持了Mermaid�
 ~~~
 
 ![mermaid sequence](http://support.typora.io/media/diagrams/Snip20160816_3.png)
+
+其他网上例子，可以copy下去试试哦：
+~~~gfm
+ ```mermaid
+ %% 时序图例子,-> 直线，-->虚线，->>实线箭头
+  sequenceDiagram
+    participant 张三
+    participant 李四
+    张三->王五: 王五你好吗？
+    loop 健康检查
+        王五->王五: 与疾病战斗
+    end
+    Note right of 王五: 合理 食物 <br/>看医生...
+    李四-->>张三: 很好!
+    王五->李四: 你怎么样?
+    李四-->王五: 很好!
+ ```
+~~~
+
 
 ### 流程图(mermaid flowchart)
 
