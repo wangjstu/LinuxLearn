@@ -236,7 +236,7 @@ Options: (H) means HTTP/HTTPS only, (F) means FTP only
  -J, --remote-header-name Use the header-provided filename (H)
  //-J, --remote-header-name 从远程文件读取头信息 (HTTP/HTTPS可用)
  -O, --remote-name   Write output to a file named as the remote file
- //-O, --remote-name   请求远程文件时，将请求返回内容以远程文件名保存到本地
+ //-O, --remote-name   请求远程文件时，将请求返回内容以远程文件名保存到本地，如果没有则报错
      --remote-name-all Use the remote file name for all URLs
      //--remote-name-all  将请求的URL设置为请求远程文件名
  -R, --remote-time   Set the remote file's time on the local output
@@ -337,7 +337,7 @@ Options: (H) means HTTP/HTTPS only, (F) means FTP only
  //-q                 如果作为第一个参数, .curlrc 中的设置无效。 curl会在程序启动时会自动尝试读取用户家目录中的.curlrc文件。
 ````
 
-## 命令速记
+## 命令速记[[译](https://curl.haxx.se/docs/manual.html)]
 
 ### 基础案例
 
@@ -417,12 +417,31 @@ curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
 
 ### 下载保存到文件
 
-* 访问SMB站点下载文件
+* 访问某站点主页并将主页另存为到本地
 ```SHELL
-curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
+curl -o thatpage.html http://www.netscape.com/
 ```
 
+* 访问某站点主页并将主页内容按URL最后文件名报错在本地，如果没有文件名，则报错
+```SHELL
+curl -O http://www.netscape.com/index.html
+#同时下载2个
+curl -O www.haxx.se/index.html -O curl.haxx.se/download.html
+```
 
+### 使用普通认证(账号密码)
+
+* FTP
+```SHELL
+使用URL中传输账号名密码的格式请求认证
+curl ftp://name:passwd@machine.domain:port/full/path/to/file
+或者使用 -u 参数
+curl -u name:passwd ftp://machine.domain:port/full/path/to/file
+```
+
+* FTPS
+* HTTP
+* HTTPS
 
 ## 常见问题记
 
