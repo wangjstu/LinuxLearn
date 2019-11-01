@@ -1,4 +1,3 @@
-# Linux 命令之 curl 小记
 
 
 ## 简介
@@ -415,7 +414,7 @@ curl "http://[2001:1890:1112:1::20]/"
 curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
 ```
 
-### 下载保存到文件
+### 下载保存到文件(Download to a File)
 
 * 访问某站点主页并将主页另存为到本地
 ```SHELL
@@ -429,7 +428,7 @@ curl -O http://www.netscape.com/index.html
 curl -O www.haxx.se/index.html -O curl.haxx.se/download.html
 ```
 
-### 使用普通认证(账号密码)
+### 使用普通认证(账号密码 Using Passwords)
 
 * FTP
 ```SHELL
@@ -440,8 +439,71 @@ curl -u name:passwd ftp://machine.domain:port/full/path/to/file
 ```
 
 * FTPS
+```SHELL
+更加推荐通过使用FTP：//和--ftp-ssl选项完成。
+```
+
+* SFTP/SCP
+```SHELL
+ 选项--key表示私钥，--pass表示密码，--pubkey表示公钥
+```
+
 * HTTP
+```SHELL
+支持以下两种方式:
+    curl http://name:passwd@machine.domain/full/path/to/file
+    curl -u name:passwd http://machine.domain/full/path/to/file
+第一种方式会由于URL规范中不能包含用户名和密码，虽然curl支持，但是通过代理时无法正常使用。
+HTTP提供了许多不同的身份验证方法，curl支持以下几种方法：Basic, Digest, NTLM and Negotiate (SPNEGO)。默认curl是Basic模式，可以使用--anyauth来与服务器选用一种更安全的方式。
+```
+
 * HTTPS
+```SHELL
+最常与私人证书一起使用：
+
+curl -k https://www.thesitetoauthenticate.com/test -v –key key.pem –cacert ca.pem –cert client.pem
+
+curl -XGET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MjgwMTY5MjIsImlkIjowLCJuYmYiOjE1MjgwMTY5MjIsInVzZXJuYW1lIjoiYWRtaW4ifQ.LjxrK9DuAwAzUD8-9v43NzWBN7HXsSLfebw92DKd1JQ" -H "Content-Type: application/json" https://127.0.0.1:8081/v1/user --cacert conf/server.crt --cert conf/server.crt --key conf/server.key
+
+```
+
+### 代理(proxy)
+curl支持HTTP及SOCKS代理，但是对FTP协议没有特别支持，不过可以HTTP及SOCKS的代理去向FTP传输文件。
+```SHELL
+curl -x my-proxy:888 ftp://ftp.leachsite.com/README   //代理名字叫my-proxy，端口是888
+curl -u user:passwd -x my-proxy:888 http://www.get.this/        //使用需要账户的代理
+curl -U user:passwd -x my-proxy:888 http://www.get.this/
+curl --noproxy localhost,get.this -x my-proxy:888 http://www.get.this/   //本地请求不适用代理，可以用逗号分隔。使用--proxy1.0 (默认是用--proxy或-x)特指适用http1.0代理，--socks4 and --socks5特指使用SOCKS4 and SOCKS5代理。
+curl -u "username@ftp.server Proxy-Username:Remote-Pass"  --ftp-account Proxy-Password --upload-file local-file ftp://my-ftp.proxy.server:21/remote/upload/path/  //ftp使用代理上传文件
+```
+
+### 断点续传(Ranges)
+http 1.1支持断点续传，可以一部分一部分下载，curl使用 -r 参数。
+```SHELL
+curl -r 0-99 http://www.get.this/   //获取前一百个字节
+curl -r -500 http://www.get.this/   //获取最后500个字节
+curl -r 0-99 ftp://www.get.this/README  //获取ftp中前100个字节，FTP中必须传起始位置截止位置
+```
+
+### 上传文件(Uploading[FTP/FTPS/SFTP/SCP/HTTP])
+```SHELL
+curl -T - ftp://ftp.upload.com/myfile        //将标准输入的数据全部上传到ftp
+curl -T uploadfile -u user:passwd ftp://ftp.upload.com/myfile       //上传文件名为uploadfile到ftp，在ftp上命名为myfile，并使用用户名和密码
+curl -T uploadfile -u user:passwd ftp://ftp.upload.com/             //上传文件名为uploadfile到ftp，在ftp上名字同本地相同
+curl -T localfile -a ftp://ftp.upload.com/remotefile                //上唇本地文件localfile，追加到ftp上名为remotefile的文件中
+curl --proxytunnel -x proxy:port -T localfile ftp.upload.com        //使用允许上传文件的代理进行文件上传
+curl -T file.txt -u "domain\username:passwd"  smb://server.example.com/share/       //SMB、SMBS上传文件
+curl -T - http://www.upload.com/myfile          //http上传标准输入中的全部数据，这是PUT请求
+```
+
+### debug追踪(Verbose / Debug)
+```SHELL
+curl -v ftp://ftp.upload.com/       //-v参数可以用来查看curl请求失败时，server端返回的详细错误信息
+curl --trace trace.txt www.haxx.se      //--trace or --trace-ascii可以获取到更详细的追踪信息，并保存到本地的trace.txt文件中
+```
+
+### 
+
 
 ## 常见问题记
 
