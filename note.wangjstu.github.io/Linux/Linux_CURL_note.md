@@ -502,7 +502,110 @@ curl -v ftp://ftp.upload.com/       //-v参数可以用来查看curl请求失败
 curl --trace trace.txt www.haxx.se      //--trace or --trace-ascii可以获取到更详细的追踪信息，并保存到本地的trace.txt文件中
 ```
 
-### 
+### 查看返回头信息(Detailed Information)
+```SHELL
+curl 可以使用 -I/--head 展示HTTP/FTP的头信息（仅展示头信息）。或使用-i/--include展示头信息及body。另外curl支持-D/--dump-header将body与头信息分开，头信息存储在单独制定的文件中，body返回展示。可以用来临时保存cookie等头信息。
+curl --dump-header headers.txt curl.haxx.se   //头信息保存在headers.txt
+```
+
+### POST(HTTP)
+```SHELL
+-d 支持 application/x-www-form-urlencoded mime-type表单传输：
+curl -d "name=Rafael%20Sagula&phone=3320780" http://www.where.com/guest.cgi //使用-d传输post参数，切记post参数要urlencode
+
+-F 支持 multipart/form-data 类型，如上传文件：
+curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html"
+  http://www.post.com/postit.cgi //上传文件，并使用@fil1.gif从文件中读取内容，后面的;type=<mime type> 指定文件类型，本例子上传了三个文件fil1.gif，fil2.txt，fil3.html。可以使用@前缀来制定提交的内容为一个文件，也可以使用<符号来提交文件中的内容。
+
+另外-F支持多个字段传输，多文件传输：
+curl -F "file=@cooltext.txt" -F "yourname=Daniel"
+  -F "filedescription=Cool text file with cool text inside"
+  http://www.post.com/postit.cgi
+curl -F "pictures=@dog.gif,cat.gif" $URL
+curl -F "docpicture=@dog.gif" -F "catpicture=@cat.gif" $URL
+
+另外可以使用  --form-string
+```
+
+### Referrer
+```SHELL
+curl -e www.coolsite.com http://www.showme.com/   //curl可以使用-e参数指定http请求头中的referred值
+```
+
+### 客户端请求标志头信息(User Agent)
+```SHELL
+curl -A 'Mozilla/3.0 (Win95; I)' http://www.nationsbank.com/ //-A或者--user-agent标志请求的客户端的标志头信息
+
+等同于 curl -H 'User-Agent: Mozilla/3.0 (Win95; I)' https://www.nationsbank.com/
+```
+
+### Cookies
+```SHELL
+HTTP是无状态的，为了解决这个问题，一般HTTP服务端返回cookie信息格式如下：Set-Cookie: sessionid=boo123; path="/foo";用于对客户端进行唯一标志状态。传输cookie可以使用以下方法：
+curl -b "name=Daniel" www.sillypage.com
+curl -b headersfile www.example.com  //其中headersfile来自 curl --dump-header headers www.example.com， 或者使用-c参数，将cookie写入一个txt文本 curl -c cookies.txt www.example.com
+curl -b cookies.txt -c cookies.txt www.example.com //保存cookie，并及时使用cookie
+curl -L -b empty.txt www.example.com //请求跟随服务器的重定向，并带上cookie。
+```
+
+### 进度信息(Progress Meter)
+```SHELL
+curl请求时候经常返回如下信息
+% Total    %   Received   %   Xferd   Average Speed Dload  Average Speed Upload        Time Total   Time Current  Time Left    CURR.Speed
+0  151M    0 38608    0     0   9406      0  4:41:43  0:00:04  4:41:39  9287
+```
+以上信息表示：
+```SHELL
+%             - 整体传输完成百分比
+Total         - 整体传输的大小
+%             - 下载完成百分比
+Received      - 当前已下载的字节数
+%             - 上传完成百分比
+Xferd         - 当前已上传的字节数
+Average Speed Dload         - 平均下载速度
+Average Speed Upload        - 平均上传速度
+Time Total    - 预计完成全部传输所需的时间
+Time Current  - 当前所消耗的时间
+Time Left     - 预计完成剩余传输所需的时间
+Curr.Speed    - 最近5秒内平均传输速度(传输最开始5秒，该值是基于线路理论上的速度来计算的)
+```
+
+### 限速请求(Speed Limit)
+```SHELL
+curl -Y 3000 -y 60 www.far-away-site.com //如果速度小于300bytes/s，并持续1分钟，则终止curl
+curl -m 1800 -Y 3000 -y 60 www.far-away-site.com  //前面的限制，另外加一个限制，在30分钟时终止请求
+curl --limit-rate 10K www.far-away-site.com   //限制请求速度在10kb/s以下
+curl --limit-rate 10240 www.far-away-site.com  //同上，限制请求速度在10kb/s以下
+curl -T upload --limit-rate 1M ftp://uploadshereplease.com  //限制上传文件的速度在1Mb/s以下
+```
+
+### 配置信息(Config File)
+curl 请求时会从本地home目录中的.curlrc （windows中是 _curlrc）中读取一些共用的配置信息，如proxy等:
+```SHELL
+# We want a 30 minute timeout:
+-m 1800
+#. .. and we use a proxy for all accesses:
+proxy = proxy.our.domain.com:8080
+# default url to get
+url = "http://help.with.curl.com/curlhelp.html"
+```
+如果要阻止使用配置文件，使用-q参数：`curl -q www.thatsite.com`
+另外可以使用-K/--config来读取一些配置从stdin中：`echo "user = user:passwd" | curl -K - http://that.secret.site.com`
+
+### 头信息(Extra Headers)
+可以使用-H参数传输头信息到Server端，如`curl -H "X-you-and-me: yes" www.love.com`
+`curl -H "Host:" www.server.com` 会发出异常的头信息。
+
+### FTP and Path Names
+```SHELL
+curl ftp://user:passwd@my.site.com/README //从ftp的服务主目录下载README，相对地址
+curl ftp://user:passwd@my.site.com//README  //从ftp的服务器的根目录下下载README，绝对地址
+```
+### SFTP and SCP and Path Names
+```SHELL
+curl -u $USER sftp://home.example.com/~/.bashrc  //sftp: 和 scp: URLs显示的是绝对地址，下载home目录中的文件
+```
+
 
 
 ## 常见问题记
