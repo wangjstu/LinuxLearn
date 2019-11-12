@@ -77,7 +77,7 @@ Options: (H) means HTTP/HTTPS only, (F) means FTP only
      --engine ENGINGE  Crypto engine (SSL). "--engine list" for list
      //--engine ENGINGE  SSL加密引擎类型，使用"--engine list"获取可用类型 
  -f, --fail          Fail silently (no output at all) on HTTP errors (H)
- //-f, --fail        连接失败时不显示HTTP错误信息 (HTTP/HTTPS可用)
+ //-f, --fail        连接失败时不显示HTTP错误详细信息，以curl错误显示 (HTTP/HTTPS可用)
  -F, --form CONTENT  Specify HTTP multipart POST data (H)
  //-F, --form CONTENT  模拟 HTTP 表单数据提交（multipart POST） (HTTP/HTTPS可用)
      --form-string STRING  Specify HTTP multipart POST data (H)
@@ -93,7 +93,7 @@ Options: (H) means HTTP/HTTPS only, (F) means FTP only
      --ftp-pasv      Use PASV/EPSV instead of PORT (F)
      //--ftp-pasv     使用 PASV/EPSV 替换 PORT (F)
  -P, --ftp-port ADR  Use PORT with given address instead of PASV (F)
- //-P, --ftp-port ADR  使用指定 PORT 及地址替换 PASV (F)
+ //-P, --ftp-port ADR  使用指定 PORT 及地址替换 PASV (F).使用端口地址，而不是使用PASV.
      --ftp-skip-pasv-ip Skip the IP address for PASV (F)
      //--ftp-skip-pasv-ip 跳过 PASV 的IP地址 (F)
      --ftp-pret      Send PRET before PASV (for drftpd) (F)
@@ -241,7 +241,7 @@ Options: (H) means HTTP/HTTPS only, (F) means FTP only
  -R, --remote-time   Set the remote file's time on the local output
  //-R, --remote-time   将远程文件的时间设置在本地输出上
  -X, --request COMMAND  Specify request command to use
- //-X, --request COMMAND  使用指定的请求命令
+ //-X, --request COMMAND  使用指定的请求方法(GET POST等)
      --resolve HOST:PORT:ADDRESS  Force resolve of HOST:PORT to ADDRESS
      //--resolve HOST:PORT:ADDRESS  强制设置请求头中的HOST为对应的ip地址+端口
      --retry NUM   Retry request NUM times if transient problems occur
@@ -463,7 +463,7 @@ HTTP提供了许多不同的身份验证方法，curl支持以下几种方法：
 
 curl -k https://www.thesitetoauthenticate.com/test -v –key key.pem –cacert ca.pem –cert client.pem
 
-curl -XGET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MjgwMTY5MjIsImlkIjowLCJuYmYiOjE1MjgwMTY5MjIsInVzZXJuYW1lIjoiYWRtaW4ifQ.LjxrK9DuAwAzUD8-9v43NzWBN7HXsSLfebw92DKd1JQ" -H "Content-Type: application/json" https://127.0.0.1:8081/v1/user --cacert conf/server.crt --cert conf/server.crt --key conf/server.key
+curl -X GET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MjgwMTY5MjIsImlkIjowLCJuYmYiOjE1MjgwMTY5MjIsInVzZXJuYW1lIjoiYWRtaW4ifQ.LjxrK9DuAwAzUD8-9v43NzWBN7HXsSLfebw92DKd1JQ" -H "Content-Type: application/json" https://127.0.0.1:8081/v1/user --cacert conf/server.crt --cert conf/server.crt --key conf/server.key
 
 ```
 
@@ -601,17 +601,176 @@ url = "http://help.with.curl.com/curlhelp.html"
 curl ftp://user:passwd@my.site.com/README //从ftp的服务主目录下载README，相对地址
 curl ftp://user:passwd@my.site.com//README  //从ftp的服务器的根目录下下载README，绝对地址
 ```
+
 ### SFTP and SCP and Path Names
 ```SHELL
 curl -u $USER sftp://home.example.com/~/.bashrc  //sftp: 和 scp: URLs显示的是绝对地址，下载home目录中的文件
 ```
 
+### FTP and Firewalls
+```SHELL
+curl -P - ftp.download.com              //使用默认网卡下载,即为使用端口地址,而不是使用PASV 
+curl -P le0 ftp.download.com            //通过网卡le0下载ftp文件
+curl -P 192.168.0.10 ftp.download.com       //将本地IP置为 192.168.0.10 去下载
+```
 
+### Network Interface
+```SHELL
+curl --interface eth0:1 http://www.netscape.com/        //使用网卡eth0,端口1请求
+curl --interface 192.168.1.10 http://www.netscape.com/      //使用网络地址 192.168.1.10 来请求
+```
+
+### HTTPS
+安装了TLS(传输层安全)库之后，curl可以请求一般的https站点：
+```SHELL
+curl https://www.secure-site.com
+```
+另外，还支持客户端使用私有证书请求，但是请求中证书必须是PEM格式。如下是请求案例
+```
+curl -E /path/to/cert.pem:password https://secure.site.com/     //使用密码+pem证书请求。这类请求如果未填写密码，则在收数据前会收到提示，填写密码
+curl -2 https://secure.site.com/      //部分站点需要特殊指定SSL或TLS版本， -3, -2 , -1 代表 SSLv3, SSLv2 , TLSv1
+curl -k -v –key key.pem –cacert ca.pem –cert client.pem https://www.thesitetoauthenticate.com/test 
+curl -k -v -4 --tlsv1.2 --cert client.pem --key key.pem https://www.thesitetoauthenticate.com/test
+```
+一般申请的证书都是PIE((Personal Information Exchange)，可以通过以下方式转换为pem：
+```SHELL
+1) 第一类：密码+证书
+使用openssl转换：openssl pkcs12 -in abcd.pfx -out abcd.pem
+根据提示输入口令及密码(Enter a passphrase and a password)，这类应用于密码+证书的。
+2) 第二类：私钥、证书等三个客户端使用的文件：
+openssl pkcs12 -in abcd.pfx -out ca.pem -cacerts -nokeys
+openssl pkcs12 -in abcd.pfx -out client.pem -clcerts -nokeys
+openssl pkcs12 -in abcd.pfx -out key.pem -nocerts
+3) 使用方法:
+curl -k https://www.thesitetoauthenticate.com/test -v –key key.pem –cacert ca.pem –cert client.pem:
+```
+另外还可以使用CURL设置options来进行https请求
+
+### 持续传输(Resuming File Transfers)
+```SHELL
+curl -C - -o file ftp://ftp.server.com/path/file        //继续从ftp下载
+curl -C - -T file ftp://ftp.server.com/path/file        //继续上传文件到ftp
+curl -C - -o file http://www.server.com/        //从http服务端继续下载
+```
+
+### Time Conditions
+If-Modified-Since与If-Unmodified-Since常用语静态文件缓存或断点续传下载等。先了解一下两者的区别：
+* If-Unmodified-Since 
+>HTTP协议中的 If-Unmodified-Since 消息头用于请求之中，使得当前请求成为条件式请求：只有当资源在指定的时间之后没有进行过修改的情况下，服务器才会返回请求的资源，或是接受 POST 或其他 non-safe 方法的请求。如果所请求的资源在指定的时间之后发生了修改，那么会返回 412 (Precondition Failed) 错误。
+
+>常见的应用场景有两种：
+
+>与 non-safe 方法如 POST 搭配使用，可以用来优化并发控制，例如在某些wiki应用中的做法：假如在原始副本获取之后，服务器上所存储的文档已经被修改，那么对其作出的编辑会被拒绝提交。
+与含有 If-Range 消息头的范围请求搭配使用，用来确保新的请求片段来自于未经修改的文档。
+
+* If-Modified-Since
+>If-Modified-Since 是一个条件式请求首部，服务器只在所请求的资源在给定的日期时间之后对内容进行过修改的情况下才会将资源返回，状态码为 200  。如果请求的资源从那时起未经修改，那么返回一个不带有消息主体的  304  响应，而在 Last-Modified 首部中会带有上次修改时间。 不同于  If-Unmodified-Since, If-Modified-Since 只可以用在 GET 或 HEAD 请求中。
+
+>当与 If-None-Match 一同出现时，它（If-Modified-Since）会被忽略掉，除非服务器不支持 If-None-Match。
+
+>最常见的应用场景是来更新没有特定 ETag 标签的缓存实体。
+
+CURL也支持：
+```SHELL
+curl -z local.html http://remote.server.com/remote.html     //如果服务器端文件更新则下载
+curl -z -local.html http://remote.server.com/remote.html       //如果本地文件较新，则下载远端
+curl -z "Jan 12 2012" http://remote.server.com/remote.html      //2012年1月12日后更新就下载
+```
+
+### DICT
+```SHELL
+别名m的意思是匹配（match)并查找(find)，而别名d是定义(define)并查找(lookup)的意思
+curl dict://dict.org/m:curl
+curl dict://dict.org/d:heisenbug:jargon
+curl dict://dict.org/d:daniel:web1913
+curl dict://dict.org/find:curl
+curl dict://dict.org/show:db  //列出所有可用词典
+curl dict://dict.org/show:strat
+curl dict://dict.org/d:bash:foldoc      //在foldoc词典中查询bash单词的含义
+```
+
+### 轻量目录访问协议(LDAP)
+linux上需要安装OpenLDAP库，windows上需要安装WinLDAP。LDAP默认用LDAPv3，当失败时有机制调用LDAPv2。
+```SHELL
+curl -B "ldap://ldap.frontec.se/o=frontec??sub?mail=*sth.frontec.se"
+curl -u user:passwd "ldap://ldap.frontec.se/o=frontec??sub?mail=*"
+curl "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"
+curl --ntlm "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"
+```
+
+### 环境变量(Environment Variables)
+curl会从环境变量中获取:http_proxy, HTTPS_PROXY, FTP_PROXY代理信息。可以通过ALL_PROXY设置所有都默认使用的代理，可以使用NO_PROXY设置不适用的代理。使用-x/--proxy 会覆盖这些环境变量。linux系统设置http/https proxy的方法，在文件 .bashrc 中添加，或者在/etc/bashrc或者/etc/profile中添加如下环境变量：
+```SHELL
+export http_proxy=proxy_addr:port
+export ftp_proxy=proxy_addr:port
+export https_proxy=proxy_addr:port
+如:
+export http_proxy="192.168.0.1:8080"
+export no_proxy='a.test.com,127.0.0.1,2.2.2.2'
+export http_proxy=http://easwy:123456@192.168.1.1:8080 //如果密码或用户名中有特殊字符，例如<，可以用 \< 来转义
+```
+
+### netrc
+文件.netrc用于设置自动登录时所需要的帐号信息。下面是一个常用的"netrc"文件的内容：
+```SHELL
+machine somehost.com login username password passwd
+default login username password passwd
+```
+curl支持-n/--netrc 和 --netrc-optional 命令参数指向使用netrc。
+
+### 自定义输出(Custom Output)
+-w/--write-out参数用于在一次完整且成功的操作后输出指定格式的内容到标准输出。
+```
+
+curl -w 'We downloaded %{size_download} bytes\n' www.baidu.com  //自定义输出下载了多大的文件
+curl -s -m 10 -o /dev/null -w %{http_code} https://www.baidu.com   //取URL返回状态码
+```
+支持参数参见[该文档](https://ec.haxx.se/usingcurl-writeout.html)
+
+### Kerberos FTP传输
+```SHELL
+curl --krb private ftp://krb4site.com -u username:fakepwd
+```
+
+### TELNET
+```SHELL
+curl telnet://remote.server.com       //向远端服务器访问，将stdin输入的数据传到远端，可以用-o将stdout输出到文件，-N/--no-buffer关闭输出
+curl -tTTYPE=vt100 telnet://remote.server.com  //使用-t选项将选项传递给telnet协议协商。要告诉服务器我们使用vt100终端
+```
+
+### 持久连接(Persistent Connections)
+在一个命令行中指定多个文件将使curl按指定的顺序依次传输所有文件。libcurl将尝试为传输使用持久连接，这样到同一主机的第二个传输就可以使用在前一个传输中已经启动并处于打开状态的连接。这大大减少了除了第一次传输之外的所有连接时间，并且更好地利用了网络。请注意，curl不能对在随后的curl调用中使用的传输使用持久连接。如果使用相同的主机，尝试在相同的命令行中填充尽可能多的url，因为这会使传输更快。如果使用HTTP代理进行文件传输，实际上所有传输都是持久的。
+
+### 单命令多请求(Multiple Transfers With A Single Command Line)
+```SHELL
+curl -O http://url.com/file.txt ftp://ftp.com/moo.exe -o moo.jpg  //第一个请求使用-O将获取到的文件保存到本地，命名为file.txt，第二个请求用-o ，另存为moo.jpg
+curl -T local1 ftp://ftp.com/moo.exe -T local2 ftp://ftp.com/moo2.txt //分别上传文件到两个ftp
+```
+
+### IPv6
+```SHELL
+curl -g http://[2001:1890:1112:1::20]/overview.html
+curl -6 -d post 'http://2001:0:db8:1111:0:0:0:11:8091/'  //-4表示ipv4，-6表示ipv6
+curl -g -6 'http://[fe80::3ad1:35ff:fe08:cd%eth0]:80/'  //telnet -6 fe80::3ad1:35ff:fe08:cd%eth0 80
+curl --interface eth0 -g -6 'http://[2606:2800:220:1:248:1893:25c8:1946]:80/index.html' -H 'Host: www.example.com'
+```
+
+### Metalink
+```SHELL
+curl --metalink http://www.example.com/example.metalink
+curl --metalink file://example.metalink
+```
 
 ## 常见问题记
+* [官方常见问题](https://curl.haxx.se/docs/faq.html)
+
+
 
 ----
 ## 参考文档:
 * [curl 文档主页](https://curl.haxx.se/docs/manpage.html)
 * [curl 帮助指南](https://curl.haxx.se/docs/manual.html)
 * [HTTP Authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
+* [HTTP HEADERS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/If-Modified-Since)
+* [usingcurl-writeout](https://ec.haxx.se/usingcurl-writeout.html)
+* [HTTP Scripting](https://curl.haxx.se/docs/httpscripting.html)
