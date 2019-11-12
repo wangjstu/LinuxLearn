@@ -644,7 +644,6 @@ openssl pkcs12 -in abcd.pfx -out key.pem -nocerts
 3) 使用方法:
 curl -k https://www.thesitetoauthenticate.com/test -v –key key.pem –cacert ca.pem –cert client.pem:
 ```
-另外还可以使用CURL设置options来进行https请求
 
 ### 持续传输(Resuming File Transfers)
 ```SHELL
