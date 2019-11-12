@@ -798,6 +798,31 @@ contents of the file
 
 * 当form表单以application/x-www-form-urlencoded(默认)提交时，使用-d将'name=value'键值对进行URL encode，保证安全。当使用-d传输原数据或json格式时，记得修改Content-Type。
 
+### PUT 请求如何发
+```SHELL
+curl -d "data to PUT" -X PUT http://example.com/new/resource/file
+```
+
+### http2 http3如何发请求
+```SHELL
+curl --http2 http://example.com/
+curl --http3 https://example.com/
+```
+
+### curl HTTP cheat sheet
+| Verbose              | Hide progress           | extra info        | Write output     | Timeout
+|----------------------|-------------------------|-------------------|------------------|--------------
+| -v                   | -s                      | -w "format"       | -O               | -m <secs>
+| --trace-ascii <file> |                         |                   | -o <file>        |
+| **POST**             | **multipart**           | **PUT**           | **HEAD**         | **custom**
+| -d "string"          | -F name=value           | -T <file>         | -I               | -X "METHOD"
+| -d @file             | -F name=@file           |                   |                  |
+| **Basic auth**       | **read cookies**        | **write cookies** | **send cookies** | **user-agent**
+| -u user:password     | -b <file>               | -c <file>         | -b "c=1; d=2"    | -A "string"
+| **Use proxy**        | **Headers, add/remove** | **follow redirs** | **gzip**         | **insecure**
+| -x <host:port>       | -H "name: value"        | -L                | --compressed     | -k
+|                      | -H "name:"              |                   |                  |
+
 
 
 ----
