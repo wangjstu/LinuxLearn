@@ -761,7 +761,42 @@ curl --metalink file://example.metalink
 ```
 
 ## 常见问题记
-* [官方常见问题](https://curl.haxx.se/docs/faq.html)
+
+### [官方常见问题](https://curl.haxx.se/docs/faq.html)
+
+### -F与-d区别
+* 当form表单以enctype=multipart/form-data提交时，使用-F，常见场景是上传文件时,
+```SHELL
+<form action="submit.cgi" method="post" enctype="multipart/form-data">
+   Name: <input type="text" name="person"><br>
+   File: <input type="file" name="secret"><br>
+   <input type="submit" value="Submit">
+</form>
+
+HTTP请求头如下:
+POST /submit.cgi HTTP/1.1
+Host: example.com
+User-Agent: curl/7.46.0
+Accept: */*
+Content-Length: 313
+Expect: 100-continue
+Content-Type: multipart/form-data; boundary=------------------------d74496d66958873e
+--------------------------d74496d66958873e
+Content-Disposition: form-data; name="person"
+
+anonymous
+--------------------------d74496d66958873e
+Content-Disposition: form-data; name="secret"; filename="file.txt"
+Content-Type: text/plain
+
+contents of the file
+--------------------------d74496d66958873e--
+
+使用案例：curl -F 'name=Dan'-F secret=@file.txt  -H 'Content-Type: multipart/magic' https://example.com
+```
+
+
+* 当form表单以application/x-www-form-urlencoded(默认)提交时，使用-d将'name=value'键值对进行URL encode，保证安全。当使用-d传输原数据或json格式时，记得修改Content-Type。
 
 
 
