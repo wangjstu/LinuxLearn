@@ -32,12 +32,14 @@ go/CONTRIBUTORS
 
 ## 第二步：配置环境变量
 ### 修改PATH
-打开`/etc/profile`，在文件最后添加如下内容
+打开`/etc/profile`，在文件最后添加如下内容(文件中目录如不存在，需要手动创建，注意文件夹权限):
 ```SHELL
+export GOBIN=/home/wangjstu/gobin
+export GOROOT=/usr/local/go
 export GOPATH=/home/wangjstu/golang
 export PATH=$PATH:/usr/local/go/bin
-
 ```
+
 执行以下命令生效及校验
 ```SHELL
 [root@wangjstu wangjstu]# source $HOME/.profile
@@ -45,9 +47,9 @@ export PATH=$PATH:/usr/local/go/bin
 ```
 
 ### 第三步：Hello world
-
+在自己的工作空间中编辑hello.go文件：
 ```SHELL
-#[wangjstu@wangjstu ~]$ vim /home/wangjstu/golang/hello.go
+#vim /home/wangjstu/golang/hello.go
 package main
 
 import "fmt"
@@ -57,8 +59,18 @@ func main() {
 }
 ```
 
+执行以下命令：
+```SHELL
+[wangjstu@wangjstu ~]$ go build /home/wangjstu/golang/hello.go
+[wangjstu@wangjstu ~]$ ./hello
+hello world
+```
+
+
 ### 关键概念讲解
-* 
+* GOPATH
+* GOROOT
+* GOBIN 
 
 
 
